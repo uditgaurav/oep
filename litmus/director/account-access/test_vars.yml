@@ -1,0 +1,3 @@
+test_name: account-resources-check
+director_ip: "{{ lookup('env','DIRECTOR_IP') }}"
+excluded_namespaces: ['openebs', 'maya-system', 'litmus', 'default', 'e2e', 'kube-public', 'kube-system']
