@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: openebs-self-install
+  generateName: openebs-self-install-
   namespace: litmus
 spec:
   template:
@@ -13,19 +13,47 @@ spec:
     spec:
       serviceAccountName: litmus
       restartPolicy: Never
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: director-user-pass
       containers:
       - name: ansibletest
-        image: mayadataio/dop-validator:ci
+        image: mayadataio/dop-validator:ci 
         imagePullPolicy: Always
+        volumeMounts:
+        - name: secret-volume
+          readOnly: true
+          mountPath: "/etc/secret-volume"
         env:
 
-          ## Enter director_ip
+          ## Takes director-ip from configmap director-ip
           - name: DIRECTOR_IP
-            value: ''
+            valueFrom:
+              configMapKeyRef:
+                name: director-ip
+                key: ip
 
-          ## Enter Group_id
+          ## Takes group-id from configmap group-id
           - name: GROUP_ID
-            value: ''
+            valueFrom:
+              configMapKeyRef:
+                name: group-id
+                key: id
+
+          ## Give director userid in secret
+          - name: DIRECTOR_USERID
+            valueFrom:
+              secretKeyRef:
+                name: director-user-pass
+                key: username
+                
+          ## Give director password in secret
+          - name: DIRECTOR_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: director-user-pass
+                key: password
 
           - name: ANSIBLE_STDOUT_CALLBACK
             value: default  
